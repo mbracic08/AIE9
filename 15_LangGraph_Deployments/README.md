@@ -141,6 +141,7 @@ route_to_action_or_helpfulness(state)   ← conditional function (NOT tools_cond
                                                │
                                                └── "HELPFULNESS:N"?
                                                     └── YES → "agent"  ← back to call_model, try again ↑
+![NODE EXECUTION FLOW](helpfulness_flowpng.png)
 
 #### Question 2:
 What is the role of `langgraph.json` in the LangGraph Deployments? Describe each of its key fields and how the platform uses this file to discover and serve your graphs.
@@ -235,7 +236,7 @@ route_to_action_or_vibe_checker(state)   ← conditional function
                                                 └── otherwise → "agent"  ← back to call_model with feedback ↑
 
 ![LangSmithStudioVibeCheckerCheck](LangSmithStudio.jpg)
-![LangSmithStudioVibeCheckerCheck](helpfulness_flow.excalidraw)
+
 
 # Ship 🚢
 
