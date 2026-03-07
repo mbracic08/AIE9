@@ -235,8 +235,7 @@ route_to_action_or_vibe_checker(state)   ← conditional function
                                                 └── otherwise → "agent"  ← back to call_model with feedback ↑
 
 ![LangSmithStudioVibeCheckerCheck](LangSmithStudio.jpg)
-
-
+![LangSmithStudioVibeCheckerCheck](helpfulness_flow.excalidraw)
 
 # Ship 🚢
 
