@@ -75,6 +75,7 @@ In the helpfulness evaluation loop, after the agent generates a response, the co
 
 The loop has two safeguards to prevent it from running indefinitely. First, helpfulness_node checks how many messages are already in the state and, if the message count exceeds 10, it does not call the evaluation model at all and instead immediately returns the marker HELPFULNESS:END. Then helpfulness_decision looks for that marker and, if it sees it, it sends the flow straight to END and stops the loop regardless of whether the answer has actually become helpful.
 
+AGENT WITH HELPFULNESS EXECUTION FLOW
 ![AGENT WITH HELPFULNESS EXECUTION FLOW](helpfulness_flow.png)
 
 #### Question 2:
@@ -96,7 +97,11 @@ After call_model, route_to_action_or_vibe_checker checks the last message. If it
 In vibechecker_node, vibe_attempts is incremented, the initial HumanMessage and the latest AIMessage are selected, and the evaluator (gpt-4.1-mini with structured output VibeCheckerResult) is invoked. If vibe_acceptable=True, the node sets vibe_passed=True; if False, it appends a rewrite instruction (detected tone + rewrite guidance) to messages, so that instruction becomes direct input for the next call_model cycle. This implementation also enforces the attempt cap in the node (attempts > MAX_VIBE_ATTEMPTS returns early without evaluator call).
 Finally, vibechecker_decision routes based on state: if vibe_passed=True, it ends; otherwise it checks the attempt counter and returns either continue (loop back to agent) or end. So call_model remains the central execution step across all cycles, both after tool execution and after vibe-feedback rewrites.
 
+VIBE CHECHER AGENT FLOW
 ![VIBE CHECHER AGENT FLOW](vibechecker_flow.png)
+
+LANGSMITH STUDIO VIBE CHEKHER
+The picture shows a live run of your vibe_checker_agent graph in LangSmith Studio, with the execution path start → agent → action → agent → vibechecker → end. The trace panel confirms the evaluation outcome (vibe_attempts = 1, vibe_passed = true), meaning the response passed the vibe check on the first attempt.
 
 ![LANG SMITH STUDIO VIBE CHEKHER](LangSmithStudio.jpg)
 
