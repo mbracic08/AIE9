@@ -17,16 +17,40 @@ from langchain_openai import ChatOpenAI
 FIREWORKS_BASE_URL = "https://api.fireworks.ai/inference/v1"
 
 
+def _int_env(name: str, default: int) -> int:
+    value = os.environ.get(name)
+    if value is None:
+        return default
+    try:
+        return int(value)
+    except ValueError:
+        return default
+
+
+def _float_env(name: str, default: float) -> float:
+    value = os.environ.get(name)
+    if value is None:
+        return default
+    try:
+        return float(value)
+    except ValueError:
+        return default
+
+
 def get_chat_model(model_name: str | None = None, *, temperature: float = 0) -> Any:
     """Return a configured LangChain ChatOpenAI client pointed at Fireworks."""
     name = model_name or os.environ.get(
         "FIREWORKS_CHAT_MODEL", "accounts/fireworks/models/gpt-oss-20b"
     )
+    max_retries = _int_env("LLM_MAX_RETRIES", 8)
+    timeout_seconds = _float_env("LLM_REQUEST_TIMEOUT_SECONDS", 90.0)
     return ChatOpenAI(
         model=name,
         temperature=temperature,
         openai_api_key=os.environ["FIREWORKS_API_KEY"],
         openai_api_base=FIREWORKS_BASE_URL,
+        max_retries=max_retries,
+        request_timeout=timeout_seconds,
     )
 
 

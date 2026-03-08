@@ -26,6 +26,26 @@ from langchain_qdrant import QdrantVectorStore
 from langgraph.graph import START, StateGraph
 
 
+def _int_env(name: str, default: int) -> int:
+    value = os.environ.get(name)
+    if value is None:
+        return default
+    try:
+        return int(value)
+    except ValueError:
+        return default
+
+
+def _float_env(name: str, default: float) -> float:
+    value = os.environ.get(name)
+    if value is None:
+        return default
+    try:
+        return float(value)
+    except ValueError:
+        return default
+
+
 def _tiktoken_len(text: str) -> int:
     """Return token length using tiktoken; used for chunk length measurement."""
     tokens = tiktoken.encoding_for_model("gpt-4o").encode(text)
@@ -68,12 +88,17 @@ def _build_rag_graph(data_dir: str):
     chunks = text_splitter.split_documents(documents) if documents else []
 
     # Embeddings and vector store (in-memory Qdrant)
+    max_retries = _int_env("LLM_MAX_RETRIES", 8)
+    timeout_seconds = _float_env("LLM_REQUEST_TIMEOUT_SECONDS", 90.0)
     embedding_model = OpenAIEmbeddings(
         model=os.environ.get("FIREWORKS_EMBEDDING_MODEL", "accounts/fireworks/models/qwen3-embedding-8b"),
         openai_api_key=os.environ["FIREWORKS_API_KEY"],
         openai_api_base="https://api.fireworks.ai/inference/v1",
         check_embedding_ctx_length=False,
         dimensions=4096,
+        max_retries=max_retries,
+        request_timeout=timeout_seconds,
+        chunk_size=_int_env("EMBEDDING_BATCH_SIZE", 32),
     )
     qdrant_vectorstore = QdrantVectorStore.from_documents(
         documents=chunks,
@@ -94,6 +119,8 @@ def _build_rag_graph(data_dir: str):
         model=os.environ.get("FIREWORKS_CHAT_MODEL", "accounts/fireworks/models/gpt-oss-20b"),
         openai_api_key=os.environ["FIREWORKS_API_KEY"],
         openai_api_base="https://api.fireworks.ai/inference/v1",
+        max_retries=max_retries,
+        request_timeout=timeout_seconds,
     )
 
     def retrieve(state: _RAGState) -> _RAGState:
