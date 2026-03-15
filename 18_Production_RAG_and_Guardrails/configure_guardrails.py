@@ -2,6 +2,7 @@
 """
 Workaround script for guardrails configure command.
 The guardrails CLI has a bug in version 0.5.14, so use this script instead.
+Writes ~/.guardrailsrc (key=value format) which the CLI actually reads for hub install.
 
 Usage:
     uv run python configure_guardrails.py [API_KEY]
@@ -13,28 +14,25 @@ Or set the API key via environment variable:
 
 import os
 import sys
+import uuid
 from pathlib import Path
 
 
 def get_config_path() -> Path:
-    """Get the guardrails config file path."""
-    home = Path.home()
-    # Guardrails stores config in ~/.guardrails/credentials.json
-    config_dir = home / ".guardrails"
-    config_dir.mkdir(exist_ok=True)
-    return config_dir / "credentials.json"
+    """Get the guardrails config file path. CLI reads from ~/.guardrailsrc (key=value), not credentials.json."""
+    return Path.home() / ".guardrailsrc"
 
 
 def configure_guardrails(api_key: str):
-    """Configure guardrails API key."""
-    import json
-    
+    """Configure guardrails API key. Writes ~/.guardrailsrc in the format the guardrails CLI expects."""
     config_path = get_config_path()
-    config = {"api_key": api_key}
-    
-    with open(config_path, "w") as f:
-        json.dump(config, f, indent=2)
-    
+    lines = [
+        f"id={uuid.uuid4()}\n",
+        f"token={api_key}\n",
+        "enable_metrics=true\n",
+        "use_remote_inferencing=true",
+    ]
+    config_path.write_text("".join(lines), encoding="utf-8")
     print(f"✅ Guardrails API key configured successfully!")
     print(f"   Config saved to: {config_path}")
     print(f"   ⚠️  Keep your API key secret and do not commit it to git!")
