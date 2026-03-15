@@ -138,8 +138,9 @@ Follow these steps to prepare and submit your homework assignment:
 Why is OAuth important for MCP servers, and what security considerations should you keep in mind when exposing tools to AI clients?
 
 #### ✅ Answer:
+OAuth is important for MCP servers because it enables secure authentication and delegated authorization without exposing user credentials. It allows AI clients to access MCP tools using scoped and revocable tokens, ensuring that only authorized agents can interact with protected resources.
 
-_(insert your answer here)_
+When exposing tools to AI clients, developers should follow the principle of least privilege, validate inputs, protect sensitive data, and implement rate limiting and logging. In AI systems, it is also important to guard against prompt injection and indirect prompt injection, where malicious content attempts to manipulate the model into misusing tools or leaking data. Therefore, MCP servers must enforce server-side authorization and tool access controls, rather than relying solely on the model’s reasoning.
 
 ### ❓ Question #2:
 
@@ -147,7 +148,11 @@ What is the Agent-to-Agent (A2A) protocol, and how does it differ from MCP in te
 
 #### ✅ Answer:
 
-_(insert your answer here)_
+The Agent-to-Agent (A2A) protocol enables communication and coordination between autonomous AI agents. It uses a standardized message format, which helps different agents and systems interoperate.
+
+A2A differs from MCP in purpose: MCP connects AI models to external tools and data, while A2A enables collaboration between multiple agents. In an A2A system, agents can also have different roles, such as an orchestrator agent that delegates tasks to worker agents.
+
+You would choose A2A when building multi-agent systems where agents need to cooperate, share context, or divide work. MCP is better for secure tool access, and the two can also work together: an agent may use MCP for tools while using A2A to communicate with other agents.
 
 ## Activity 1: Extend the MCP Server
 

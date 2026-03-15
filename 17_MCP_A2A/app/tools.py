@@ -139,3 +139,28 @@ async def checkout() -> dict:
         "total": cart["total"],
         "message": f"Order {order_id} confirmed! Thanks {username}, your cats will love their new goodies!",
     }
+
+@mcp.tool()
+async def search_products(query: str, category: str | None = None) -> list[dict]:
+    """Search the cat shop catalog by keyword (matches product name and description). Optionally filter by category (toys, beds, food, furniture)."""
+    if not query or not query.strip():
+        return []
+    db = await oauth_provider._get_db()
+    pattern = f"%{query.strip()}%"
+    if category:
+        cursor = await db.execute(
+            """SELECT id, name, description, price, category FROM products
+               WHERE category = ? AND (name LIKE ? OR description LIKE ?)""",
+            (category, pattern, pattern),
+        )
+    else:
+        cursor = await db.execute(
+            """SELECT id, name, description, price, category FROM products
+               WHERE name LIKE ? OR description LIKE ?""",
+            (pattern, pattern),
+        )
+    rows = await cursor.fetchall()
+    return [
+        {"id": r[0], "name": r[1], "description": r[2], "price": r[3], "category": r[4]}
+        for r in rows
+    ]
